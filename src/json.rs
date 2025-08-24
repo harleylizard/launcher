@@ -38,11 +38,11 @@ impl Dependency {
 
 impl Java {
 
-    fn get_path(&self) -> PathBuf {
+    pub(crate) fn get_path(&self) -> PathBuf {
         PathBuf::from(&self.name)
     }
 
-    fn get_url(&self) -> Result<Url, ParseError> {
+    pub(crate) fn get_url(&self) -> Result<Url, ParseError> {
         Url::parse(&self.url)
     }
 }
@@ -51,6 +51,10 @@ impl Manifest {
 
     pub(crate) fn get_platform(&self) -> &Platform {
         &self.platform
+    }
+
+    pub(crate) fn get_java(&self) -> &Java {
+        &self.java
     }
 
     pub(crate) fn get_dependencies(&self) -> &Vec<Dependency> {
