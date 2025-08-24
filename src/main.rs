@@ -1,3 +1,12 @@
+mod platform;
+
+use std::path::Path;
+
 fn main() {
-    println!("Hello, world!");
+    let path = Path::new("manifest.json");
+    if path.is_file() {
+
+        return;
+    }
+
 }
