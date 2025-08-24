@@ -14,7 +14,7 @@ pub(crate) struct Dependency {
 pub(crate) struct Java {
     name: String,
     url: String,
-    main: String,
+    command: String
 
 }
 
@@ -38,12 +38,20 @@ impl Dependency {
 
 impl Java {
 
+    pub(crate) fn get_name(&self) -> &String {
+        &self.name
+    }
+    
     pub(crate) fn get_path(&self) -> PathBuf {
         PathBuf::from(&self.name)
     }
 
     pub(crate) fn get_url(&self) -> Result<Url, ParseError> {
         Url::parse(&self.url)
+    }
+
+    pub(crate) fn get_command(&self) -> &String {
+        &self.command
     }
 }
 
