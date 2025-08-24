@@ -12,4 +12,6 @@ url = "2.5.7"
 tokio = {version = "1.47.1", features = ["full"]}
 tempfile = "3.21.0"
 zip = "4.5.0"
+log = "0.4.27"
 fern = "0.7.1"
+chrono = "0.4.41"

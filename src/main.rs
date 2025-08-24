@@ -11,6 +11,7 @@ use reqwest::Client;
 use std::error::Error;
 use std::fs;
 use std::path::{Path, PathBuf};
+use chrono::Local;
 use tokio::task::JoinSet;
 
 fn relative(first: &Path, second: &PathBuf) -> Result<PathBuf, Box<dyn Error>> {
@@ -19,13 +20,21 @@ fn relative(first: &Path, second: &PathBuf) -> Result<PathBuf, Box<dyn Error>> {
     Ok(parent.join(second))
 }
 
-async fn prompt_jre(java: &Java, path: &Path, client: Client) -> Result<(), Box<dyn Error>> {
-    download_jre(java.get_url()?, path, &client).await?;
-    
+async fn run_jre(java: &Java, client: Client) -> Result<(), Box<dyn Error>> {
+    download_jre(java.get_url()?, &java.get_path(), &client).await?;
+
     Ok(())
 }
 
 async fn spin(path: &Path) -> Result<(), Box<dyn Error>> {
+    fern::Dispatch::new()
+        .level(log::LevelFilter::Info)
+        .chain(std::io::stdout())
+        .format(|out, message, record| {
+            out.finish(format_args!("{} {} {}", Local::now().format("%H:%M:%S"), record.level(), message))
+        })
+        .apply()?;
+
     let string = fs::read_to_string(path)?;
 
     let manifest: Manifest = serde_json::from_str(&string)?;
@@ -38,20 +47,23 @@ async fn spin(path: &Path) -> Result<(), Box<dyn Error>> {
     let mut tasks: JoinSet<()> = JoinSet::new();
 
     for dependency in manifest.get_dependencies() {
-        let downloadable = Downloadable::new(relative(path, &dependency.get_path())?, dependency.get_url()?);
+        let artifact = relative(path, &dependency.get_path())?;
+        if !artifact.is_file() {
+            let downloadable = Downloadable::new(artifact, dependency.get_url()?);
 
-        let cl = client.clone();
+            let cl = client.clone();
 
-        tasks.spawn(async move {
-            downloadable.download(&cl).await.expect("Failed to download")
-        });
+            tasks.spawn(async move {
+                downloadable.download(&cl).await.expect("Failed to download")
+            });
+        }
     }
 
     while let Some(_task) = tasks.join_next().await {
     }
 
     let java = manifest.get_java();
-    prompt_jre(java, &path, client).await?;
+    run_jre(java, client).await?;
 
     Ok(())
 }
