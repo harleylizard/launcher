@@ -4,20 +4,20 @@ use std::error::Error;
 use std::fs;
 use std::path::PathBuf;
 
-struct Downloadable {
+pub(crate) struct Downloadable {
     path: PathBuf,
     url: Url
 }
 
 impl Downloadable {
-    fn new(path: PathBuf, url: Url) -> Downloadable {
+    pub(crate) fn new(path: PathBuf, url: Url) -> Downloadable {
         Downloadable {
             path,
             url,
         }
     }
 
-    async fn download(self, client: &Client) -> Result<(), Box<dyn Error>> {
+    pub(crate) async fn download(self, client: &Client) -> Result<(), Box<dyn Error>> {
         if let Some(parent) = self.path.parent() {
             fs::create_dir_all(parent)?;
         }

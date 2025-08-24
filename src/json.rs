@@ -5,21 +5,21 @@ use std::path::PathBuf;
 use url::ParseError;
 
 #[derive(Deserialize)]
-struct Dependency {
+pub(crate) struct Dependency {
     name: String,
     url: String,
 }
 
 #[derive(Deserialize)]
-struct Java {
+pub(crate) struct Java {
     name: String,
     url: String,
     main: String,
-    
+
 }
 
 #[derive(Deserialize)]
-struct Manifest {
+pub(crate) struct Manifest {
     platform: Platform,
     java: Java,
     dependencies: Vec<Dependency>,
@@ -27,11 +27,11 @@ struct Manifest {
 
 impl Dependency {
 
-    fn get_path(&self) -> PathBuf {
+    pub(crate) fn get_path(&self) -> PathBuf {
         PathBuf::from(&self.name)
     }
 
-    fn get_url(&self) -> Result<Url, ParseError> {
+    pub(crate) fn get_url(&self) -> Result<Url, ParseError> {
         Url::parse(&self.url)
     }
 }
@@ -44,5 +44,16 @@ impl Java {
 
     fn get_url(&self) -> Result<Url, ParseError> {
         Url::parse(&self.url)
+    }
+}
+
+impl Manifest {
+
+    pub(crate) fn get_platform(&self) -> &Platform {
+        &self.platform
+    }
+
+    pub(crate) fn get_dependencies(&self) -> &Vec<Dependency> {
+        &self.dependencies
     }
 }
