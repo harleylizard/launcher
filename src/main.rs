@@ -1,4 +1,5 @@
 mod platform;
+mod dependency;
 
 use std::path::Path;
 
